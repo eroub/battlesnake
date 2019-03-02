@@ -44,24 +44,48 @@ def start():
 
     return start_response(color)
 
-
-
 @bottle.post('/move')
 def move():
     direction = ['up', 'down', 'left', 'right']
     data = bottle.request.json
 
     head = data['you']['body'][0]
+    b1 = data['you']['body'][1]
 
-    #left_wall = {'x': 0, 'y': }
+    # Check if body is above
+    if head['x'] == b1['x'] and head['y'] > b1['y']:
+        direction.pop(0)
+        no_up = True
+    # Check if body is below
+    if head['x'] == b1['x'] and head['y'] < b1['y']:
+        direction.pop(1)
+        no_down = True
+    # Check if body is to the right
+    if head['y'] == b1['y'] and head['x'] < b1['x']:
+        direction.pop(3)
+        no_right = True
+    # Check if body is to the left
+    if head['y'] == b1['y'] and head['x'] > b1['x']:
+        direction.pop(2)
+        no_left = True
 
+    # If head is at top_wall don't go up
+    if head['y'] == 0 and 'up' in direction:
+        direction.pop(0)
+    # If head is at bottom_wall don't go down
+    if head['y'] == data['board']['width']-1 and 'down' in direction:
+        direction.pop(direction.index('down'))
+    # If head is at left_wall don't go left
+    if head['x'] == 0 and 'left' in direction:
+        direction.pop(direction.index('left'))
+    # If head is at right_wall don't go right
+    if head['x'] == data['board']['width']-1 and 'right' in direction:
+        direction.pop(direction.index('right'))
 
-    print(json.dumps(data))
+    directions = random.choice(direction)
+    print(data['board']['food'])
 
-    directions = ['up', 'down', 'left', 'right']
-    direction = random.choice(directions)
-
-    return move_response(direction)
+    return move_response(directions)
 
 
 @bottle.post('/end')
@@ -82,7 +106,7 @@ application = bottle.default_app()
 if __name__ == '__main__':
     bottle.run(
         application,
-        host=os.getenv('IP', 'http://roubekas.com'),
+        host=os.getenv('IP', '0.0.0.0'),
         port=os.getenv('PORT', '8080'),
         debug=os.getenv('DEBUG', True)
     )
