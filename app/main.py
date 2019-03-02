@@ -50,25 +50,24 @@ def move():
     data = bottle.request.json
 
     head = data['you']['body'][0]
-    b1 = data['you']['body'][1]
 
-    # Check if body is above
-    if head['x'] == b1['x'] and head['y'] > b1['y']:
-        direction.pop(0)
-        no_up = True
-    # Check if body is below
-    if head['x'] == b1['x'] and head['y'] < b1['y']:
-        direction.pop(1)
-        no_down = True
-    # Check if body is to the right
-    if head['y'] == b1['y'] and head['x'] < b1['x']:
-        direction.pop(3)
-        no_right = True
-    # Check if body is to the left
-    if head['y'] == b1['y'] and head['x'] > b1['x']:
-        direction.pop(2)
-        no_left = True
+    # ################## BODY CHECK ###################
+    n = 0
+    while(n <= len(data['you']['body'])-1):
+        body = data['you']['body'][n]
+        if body['y'] == head['y']:
+            if body['x']-head['x'] == 1:
+                direction.pop(direction.index('right'))
+            elif body['x']-head['x'] == -1:
+                direction.pop(direction.index('left'))
+        elif body['x'] == head['x']:
+            if body['y']-head['y'] == -1:
+                direction.pop(direction.index('up'))
+            elif body['y']-head['y'] == 1:
+                direction.pop(direction.index('down'))
+        n = n+1
 
+    # ################## WALL CHECK ###################
     # If head is at top_wall don't go up
     if head['y'] == 0 and 'up' in direction:
         direction.pop(0)
@@ -83,8 +82,6 @@ def move():
         direction.pop(direction.index('right'))
 
     directions = random.choice(direction)
-    print(data['board']['food'])
-
     return move_response(directions)
 
 
